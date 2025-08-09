@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CrazzyWeb - Connexion</title>
     <style>
-        * {
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
 
         body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             background-color: #000;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             color: white;
+            min-height: 100vh;
         }
 
         .login-container {
@@ -27,7 +26,13 @@
             border-radius: 8px;
             padding: 40px;
             width: 350px;
+            max-width: 90vw;
+            margin: 40px auto 0;
             text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .logo {
@@ -164,11 +169,10 @@
         }
 
         .footer {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
             text-align: center;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            border-top: 1px solid #333;
         }
 
         .footer-links {
@@ -196,6 +200,7 @@
             gap: 20px;
             font-size: 12px;
             color: #8e8e8e;
+            flex-wrap: wrap;
         }
 
         .language-selector {
@@ -226,13 +231,13 @@
                 padding: 30px 20px;
             }
 
-            .footer {
-                position: relative;
-                margin-top: 40px;
-            }
-
             .footer-links {
                 gap: 15px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -243,11 +248,11 @@
         
         <form id="loginForm">
             <div class="input-group">
-                <input type="text" id="username" name="username" class="input-field" placeholder="Num. téléphone, nom de profil ou e-mail" required>
+                <input type="text" id="username" name="username" class="input-field" placeholder="Num. téléphone, nom de profil ou e-mail" required />
             </div>
             
             <div class="input-group">
-                <input type="password" id="password" name="password" class="input-field" placeholder="Mot de passe" required>
+                <input type="password" id="password" name="password" class="input-field" placeholder="Mot de passe" required />
             </div>
             
             <button type="submit" class="login-btn" id="loginBtn">Se connecter</button>
@@ -306,37 +311,29 @@
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             
-            // Réinitialiser les messages d'erreur
             error.textContent = '';
             
-            // Validation basique
             if (!username || !password) {
                 error.textContent = 'Veuillez remplir tous les champs';
                 return;
             }
             
-            // Afficher le loader
             loginBtn.disabled = true;
             loginBtn.textContent = 'Connexion...';
             loading.style.display = 'block';
             
             try {
-                // Envoyer les données au serveur
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password
-                    })
+                    body: JSON.stringify({ username, password })
                 });
                 
                 const data = await response.json();
                 
                 if (data.status === 'success') {
-                    // Redirection ou message de succès
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
@@ -350,14 +347,12 @@
                 console.error('Erreur:', err);
                 error.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
                 
-                // Réinitialiser le bouton
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Se connecter';
                 loading.style.display = 'none';
             }
         });
 
-        // Animation au focus des champs
         document.querySelectorAll('.input-field').forEach(input => {
             input.addEventListener('focus', function() {
                 this.style.transform = 'scale(1.02)';
@@ -367,10 +362,7 @@
             input.addEventListener('blur', function() {
                 this.style.transform = 'scale(1)';
             });
-        });
 
-        // Réinitialiser les messages d'erreur quand l'utilisateur tape
-        document.querySelectorAll('.input-field').forEach(input => {
             input.addEventListener('input', function() {
                 document.getElementById('error').textContent = '';
             });
